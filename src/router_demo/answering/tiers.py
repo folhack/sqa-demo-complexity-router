@@ -20,7 +20,7 @@ TIER_CONFIGS = {
         model_env="MODEL_MEDIUM",
         system_prompt=(
             f"You are a software quality assistant. {LANGUAGE} Structure the answer as: "
-            "short context, comparison or criteria as a list, and a recommendation."
+            "short context, comparison or criteria as a list, limitations, and a recommendation."
         ),
         price_per_1k=0.005,
     ),

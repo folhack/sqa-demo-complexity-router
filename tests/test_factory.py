@@ -46,6 +46,11 @@ def test_openai_backend_builds_chat_model(monkeypatch: pytest.MonkeyPatch) -> No
     assert model_label(deterministic) == "small-model"
 
 
+def test_medium_prompt_asks_for_limitations() -> None:
+    prompt = TIER_CONFIGS["medium"].system_prompt
+    assert prompt.index("limitations") < prompt.index("recommendation")
+
+
 def test_fake_classifier_ignores_accents() -> None:
     llm = FakeChatModel(role="classifier")
     question = "Defina uma estratégia de adoção de IA no time sem aumentar a duplicação de código"
