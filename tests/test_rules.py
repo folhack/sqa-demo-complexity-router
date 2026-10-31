@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from router_demo.routing import rules
-from router_demo.routing.rules import Rule, estimate_complexity_hint, extract_features, score
+from router_demo.routing.rules import estimate_complexity_hint, extract_features, score
 
 
 def words(count: int, prefix: str = "") -> str:
@@ -25,7 +25,7 @@ EXPECTED_ROUTES = [
     ("explain the metric", "simple"),
     ("", "simple"),
     ("   ", "simple"),
-    ("```x```", "simple"),
+    ("```x```", "medium"),
     ("ROADMAP\nfor migration", "simple"),
     ("Write a plan to reduce duplication in our service quickly", "complex"),
     ("a plan for the team to follow now ok", "medium"),
@@ -103,10 +103,8 @@ def test_score_returns_known_weight() -> None:
     assert score(extract_features("What is coupling?")) == rules.SIMPLE
 
 
-def test_new_rule_is_a_single_table_entry(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_code_block_routes_to_complex() -> None:
+    assert rules.RULES[0].name == "code_block"
     question = "compare these ```a``` and ```b``` two snippets for me please now"
-    assert estimate_complexity_hint("short ```x``` block?") == "simple"
-    code_rule = Rule("code_block", lambda f: f.code_block, rules.COMPLEX)
-    monkeypatch.setattr(rules, "RULES", (code_rule, *rules.RULES))
     assert estimate_complexity_hint(question) == "complex"
     assert estimate_complexity_hint("ten words ```x``` here in this block of code yes") == "complex"
