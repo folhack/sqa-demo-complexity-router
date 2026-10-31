@@ -2,7 +2,9 @@
 
 from langchain_core.callbacks import UsageMetadataCallbackHandler
 from langchain_openai import ChatOpenAI
-from openai import BadRequestError
+from openai import BadRequestError, OpenAIError
+
+LLM_ERRORS = (OpenAIError, ValueError, TypeError, RuntimeError, OSError)
 
 
 def make_llm(settings, model_env, temperature=None):

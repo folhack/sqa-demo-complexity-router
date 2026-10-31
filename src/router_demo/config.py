@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 
 DEBUG = False
 
+APPROVAL_SCORE = 7
+
 PRICES = {"small": 0.0005, "medium": 0.005, "strong": 0.01, "judge": 0.01}
 
 
