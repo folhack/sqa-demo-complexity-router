@@ -63,11 +63,11 @@ class Adjustment:
 
 
 RULES = (
+    Rule("code_block", lambda f: f.code_block, COMPLEX),
     Rule("short_definition", lambda f: f.short and f.is_question and f.simple_word, SIMPLE),
     Rule("short_how_to", lambda f: f.short and f.is_question and f.how_word, MEDIUM),
     Rule("short", lambda f: f.short, SIMPLE),
     Rule("complex_keyword", lambda f: f.complex_word, COMPLEX),
-    Rule("medium_keyword_with_code", lambda f: f.mid and f.medium_word and f.code_block, COMPLEX),
     Rule("medium_keyword", lambda f: f.mid and f.medium_word, MEDIUM),
     Rule(
         "detailed_question",
