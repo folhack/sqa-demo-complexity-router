@@ -1,67 +1,63 @@
 """Terminal panels rendered with rich."""
 
+from __future__ import annotations
+
+from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-
-def verdict_text(approved):
-    if approved:
-        return Text("APROVADA", style="bold green")
-    return Text("NÃO VALIDADA", style="bold red")
+APPROVED = "APROVADA"
+NOT_VALIDATED = "NÃO VALIDADA"
 
 
-def summary_table(summary):
+def verdict_text(summary: dict) -> Text:
+    if summary["approved"]:
+        return Text(APPROVED, style="bold green")
+    return Text(NOT_VALIDATED, style="bold red")
+
+
+def summary_table(summary: dict) -> Table:
     table = Table.grid(padding=(0, 2))
     table.add_column(style="bold cyan")
     table.add_column()
-    table.add_row("Pergunta", Text(summary["question"]))
-    table.add_row("Rota inicial", Text(summary["initial_tier"]))
-    table.add_row("Rota final", Text(summary["final_tier"]))
-    table.add_row("Caminho", Text(" > ".join(summary["path"])))
-    table.add_row("Modelos", Text(", ".join(summary["models"])))
-    table.add_row("Tentativas", Text(str(summary["attempts"])))
-    table.add_row("Tokens", Text(str(summary["tokens"])))
-    table.add_row("Custo estimado (USD)", Text("%.6f" % summary["cost"]))
-    table.add_row("Nota do juiz", Text(str(summary["score"])))
-    table.add_row("Cache", Text("sim" if summary["cached"] else "não"))
-    table.add_row("Veredito", verdict_text(summary["approved"]))
+    rows = [
+        ("Pergunta", summary["question"]),
+        ("Rota inicial", summary["initial_tier"]),
+        ("Rota final", summary["final_tier"]),
+        ("Caminho", " > ".join(summary["path"])),
+        ("Modelos", ", ".join(summary["models"])),
+        ("Tentativas", str(summary["attempts"])),
+        ("Tokens", str(summary["tokens"])),
+        ("Custo estimado (USD)", f"{summary['cost']:.6f}"),
+        ("Nota do juiz", str(summary["score"])),
+        ("Cache", "sim" if summary["cached"] else "não"),
+    ]
+    for label, value in rows:
+        table.add_row(label, Text(value))
+    table.add_row("Veredito", verdict_text(summary))
     table.add_row("Problemas", Text("\n".join(summary["issues"]) or "nenhum"))
     return table
 
 
-def render(summary, console):
+def render(summary: dict, console: Console) -> None:
     console.print(Panel(summary_table(summary), title="Roteamento", expand=False))
     console.print(Panel(Text(summary["answer"]), title="Resposta"))
 
 
-def batch_row(question, expected, initial, final, attempts, score, approved):
-    return (
-        Text(question),
-        expected,
-        initial,
-        final,
-        str(attempts),
-        str(score),
-        verdict_text(approved),
-    )
-
-
-def render_batch(rows, console):
+def render_batch(rows: list[tuple[str, dict]], console: Console) -> None:
     table = Table(title="Resumo do lote")
     table.add_column("Pergunta", max_width=48, no_wrap=True, overflow="ellipsis")
     for header in ("Esperada", "Inicial", "Final", "Tentativas", "Nota", "Veredito"):
         table.add_column(header)
-    for expected, s in rows:
+    for expected, summary in rows:
         table.add_row(
-            *batch_row(
-                s["question"],
-                expected,
-                s["initial_tier"],
-                s["final_tier"],
-                s["attempts"],
-                s["score"],
-                s["approved"],
-            )
+            Text(summary["question"]),
+            expected,
+            summary["initial_tier"],
+            summary["final_tier"],
+            str(summary["attempts"]),
+            str(summary["score"]),
+            verdict_text(summary),
         )
     console.print(table)

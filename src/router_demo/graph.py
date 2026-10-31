@@ -1,12 +1,15 @@
 """Graph assembly, routing by tier and escalation."""
 
+from __future__ import annotations
+
 from langgraph.graph import END, START, StateGraph
 
 from router_demo.answering.nodes import make_answer_node, make_plan_node
 from router_demo.answering.tiers import PLANNER, TIER_CONFIGS
+from router_demo.config import APPROVAL_SCORE
 from router_demo.llm.factory import make_llm
 from router_demo.routing.classifier import classify
-from router_demo.state import TIERS, RouterState, append_trace
+from router_demo.state import TIERS, RouterState, record
 from router_demo.validation.verdict import after_validation, validate
 
 NEXT_TIER = {"simple": "medium", "medium": "complex", "complex": "complex"}
@@ -23,24 +26,18 @@ def build_models(settings):
     }
 
 
-def route_by_tier(state):
-    if state["tier"] == "complex":
-        return "plan_complex"
-    return "answer_" + state["tier"]
+def route_by_tier(state: RouterState) -> str:
+    return "plan_complex" if state["tier"] == "complex" else f"answer_{state['tier']}"
 
 
-def escalate(state):
+def escalate(state: RouterState) -> RouterState:
     verdict = state["verdict"]
-    previous = state["tier"]
-    issues = "; ".join(verdict["issues"])
-    if not issues:
-        issues = "Score " + str(verdict["score"]) + " below 7."
-    trace = append_trace({"node": "escalate"}, state.get("trace"))
-    return {"tier": NEXT_TIER[state["tier"]], "feedback": issues, "trace": trace}
+    issues = "; ".join(verdict["issues"]) or f"Score {verdict['score']} below {APPROVAL_SCORE}."
+    return {"tier": NEXT_TIER[state["tier"]], "feedback": issues, **record(state, "escalate")}
 
 
-def present(state):
-    return {"trace": append_trace({"node": "present"}, state.get("trace"))}
+def present(state: RouterState) -> RouterState:
+    return record(state, "present")
 
 
 def build_graph(models):

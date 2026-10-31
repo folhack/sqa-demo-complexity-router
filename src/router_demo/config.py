@@ -3,12 +3,9 @@
 import os
 from dataclasses import dataclass, field
 
-DEBUG = False
-
 APPROVAL_SCORE = 7
 MAX_ATTEMPTS = 2
-
-PRICES = {"small": 0.0005, "medium": 0.005, "strong": 0.01, "judge": 0.01}
+SHORTCUT_MAX_WORDS = 8
 
 
 @dataclass(frozen=True)

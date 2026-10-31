@@ -44,7 +44,7 @@ python -m router_demo.cli --clear-cache --password <valor>
 
 O painel mostra rota inicial e final, caminho no grafo, modelos usados, tentativas, tokens, custo estimado, nota do juiz, veredito (APROVADA ou NÃO VALIDADA), problemas apontados e a resposta. As respostas ficam em cache em `.cache/answers.json`.
 
-**Custos:** os preços por 1k tokens são estimativas fixas no código (`PRICES` em `config.py`), não valores cobrados pela OpenAI. Use-os só como ordem de grandeza.
+**Custos:** os preços por 1k tokens são estimativas fixas no código (`TierConfig`), não valores cobrados pela OpenAI. Use-os só como ordem de grandeza.
 
 ## Estrutura
 

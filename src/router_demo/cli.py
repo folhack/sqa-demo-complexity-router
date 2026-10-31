@@ -1,10 +1,13 @@
 """Command line entry point: python -m router_demo.cli."""
 
+from __future__ import annotations
+
 import argparse
 import hmac
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from dotenv import find_dotenv, load_dotenv
 from rich.console import Console
@@ -12,12 +15,13 @@ from rich.console import Console
 from router_demo.config import Settings, load_settings
 from router_demo.graph import build_graph, build_models
 from router_demo.llm.cache import AnswerCache
+from router_demo.llm.factory import LLM_ERRORS
 from router_demo.presentation.console import render, render_batch
 from router_demo.presentation.report import write_report
 from router_demo.presentation.summary import summarize
 
 
-def parse_args(argv):
+def parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="router_demo", description="Software quality Q&A router")
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--question", help="single question to answer")
@@ -29,12 +33,14 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-def answer_question(app, cache, question, use_cache):
-    if use_cache:
-        cached = cache.get(question)
-        if cached is not None:
-            cached["cached"] = True
-            return cached
+def load_batch(path: Path) -> list[dict]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def answer_question(app: Any, cache: AnswerCache, question: str, use_cache: bool) -> dict:
+    cached = cache.get(question) if use_cache else None
+    if cached is not None:
+        return {**cached, "cached": True}
     summary = summarize(app.invoke({"question": question}))
     if use_cache:
         cache.put(question, summary)
@@ -54,26 +60,19 @@ def clear_cache(settings: Settings, password: str, cache: AnswerCache, console: 
     return 0
 
 
-def run(args, console):
+def run(args: argparse.Namespace, console: Console) -> int:
     settings = load_settings()
     cache = AnswerCache()
     if args.clear_cache:
         return clear_cache(settings, args.password, cache, console)
-    if args.batch:
-        items = json.loads(args.batch.read_text(encoding="utf-8"))
-    else:
-        items = [{"question": args.question}]
-    # for item in items:
-    #     print(item["question"], item.get("expected_tier"))
-    # TODO: support streaming responses
+    items = load_batch(args.batch) if args.batch else [{"question": args.question}]
     app = build_graph(build_models(settings))
-    rows = []
-    failures = 0
+    rows, failures = [], 0
     for item in items:
         try:
             summary = answer_question(app, cache, item["question"], not args.no_cache)
-        except Exception as e:
-            console.print("Falha ao responder (" + type(e).__name__ + "): " + item["question"])
+        except LLM_ERRORS as exc:
+            console.print(f"Falha ao responder ({type(exc).__name__}): {item['question']}")
             failures += 1
             continue
         render(summary, console)
@@ -82,13 +81,11 @@ def run(args, console):
         render_batch(rows, console)
     if args.report:
         write_report([summary for _, summary in rows], args.report)
-        console.print("Relatório salvo em " + str(args.report))
-    if failures:
-        return 1
-    return 0
+        console.print(f"Relatório salvo em {args.report}")
+    return 1 if failures else 0
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
     load_dotenv(find_dotenv(usecwd=True))
     return run(parse_args(argv), Console())
 
