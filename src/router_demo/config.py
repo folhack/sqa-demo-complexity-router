@@ -11,6 +11,14 @@ PRICES = {"small": 0.0005, "medium": 0.005, "strong": 0.01, "judge": 0.01}
 
 
 @dataclass(frozen=True)
+class TierConfig:
+    name: str
+    model_env: str
+    system_prompt: str
+    price_per_1k: float
+
+
+@dataclass(frozen=True)
 class Settings:
     models: dict = field(default_factory=dict)
     cache_admin_password: str = field(default="", repr=False)

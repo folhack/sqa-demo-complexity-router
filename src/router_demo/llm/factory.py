@@ -1,6 +1,7 @@
 """Chat model creation and token accounting."""
 
 from langchain_core.callbacks import UsageMetadataCallbackHandler
+from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from openai import BadRequestError, OpenAIError
 
@@ -21,6 +22,11 @@ def make_llm(settings, model_env, temperature=None):
 def model_label(llm):
     inner = getattr(llm, "runnable", llm)
     return str(getattr(inner, "model_name", None) or getattr(inner, "model", None) or "")
+
+
+def message_tokens(message: BaseMessage) -> int:
+    usage = getattr(message, "usage_metadata", None) or {}
+    return int(usage.get("total_tokens", 0))
 
 
 def invoke_with_usage(runnable, inputs):

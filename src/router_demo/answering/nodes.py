@@ -2,15 +2,53 @@
 
 import sys
 import time
+from collections.abc import Callable
+from typing import Any
 
-from router_demo.answering.prompts import COMPLEX_PROMPT, MEDIUM_PROMPT, PLAN_PROMPT, SIMPLE_PROMPT
-from router_demo.config import DEBUG, PRICES
-from router_demo.llm.factory import model_label
-from router_demo.state import append_trace
+from router_demo.answering.tiers import PLANNER, TIER_CONFIGS
+from router_demo.config import DEBUG, PRICES, TierConfig
+from router_demo.llm.factory import message_tokens, model_label
+from router_demo.state import RouterState, append_trace, record
+
+Node = Callable[[RouterState], RouterState]
+
+
+def build_messages(config: TierConfig, state: RouterState) -> list[tuple[str, str]]:
+    messages = [("system", config.system_prompt), ("human", state["question"])]
+    if state.get("plan"):
+        messages.append(("human", f"Outline to follow:\n{state['plan']}"))
+    if state.get("feedback"):
+        messages.append(("human", f"Reviewer feedback to address:\n{state['feedback']}"))
+    return messages
+
+
+def call_model(
+    config: TierConfig, llm: Any, state: RouterState, node: str
+) -> tuple[str, RouterState]:
+    message = llm.invoke(build_messages(config, state))
+    tokens = message_tokens(message)
+    return message.text, record(state, node, model_label(llm), tokens, config.price_per_1k)
+
+
+def make_answer_node(config: TierConfig, llm: Any) -> Node:
+    def answer(state: RouterState) -> RouterState:
+        text, update = call_model(config, llm, state, f"answer_{config.name}")
+        return {"answer": text, **update}
+
+    return answer
+
+
+def make_plan_node(config: TierConfig, llm: Any) -> Node:
+    def plan(state: RouterState) -> RouterState:
+        fresh = {**state, "plan": "", "feedback": ""}
+        text, update = call_model(config, llm, fresh, "plan_complex")
+        return {"plan": text, **update}
+
+    return plan
 
 
 def answer_simple(state, llm):
-    system_prompt = SIMPLE_PROMPT
+    system_prompt = TIER_CONFIGS["simple"].system_prompt
     price = PRICES["small"]
     node_name = "answer_simple"
     started = time.time()
@@ -42,7 +80,7 @@ def answer_simple(state, llm):
 
 
 def answer_medium(state, llm):
-    system_prompt = MEDIUM_PROMPT
+    system_prompt = TIER_CONFIGS["medium"].system_prompt
     price = PRICES["medium"]
     node_name = "answer_medium"
     started = time.time()
@@ -74,7 +112,7 @@ def answer_medium(state, llm):
 
 
 def plan_complex(state, llm):
-    system_prompt = PLAN_PROMPT
+    system_prompt = PLANNER.system_prompt
     price = PRICES["strong"]
     node_name = "plan_complex"
     started = time.time()
@@ -106,7 +144,7 @@ def plan_complex(state, llm):
 
 
 def answer_complex(state, llm):
-    system_prompt = COMPLEX_PROMPT
+    system_prompt = TIER_CONFIGS["complex"].system_prompt
     price = PRICES["strong"]
     node_name = "answer_complex"
     started = time.time()

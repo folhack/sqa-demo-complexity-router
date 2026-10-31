@@ -50,7 +50,7 @@ O painel mostra rota inicial e final, caminho no grafo, modelos usados, tentativ
 
 ```
 src/router_demo/
-  config.py        configurações e constantes
+  config.py        configurações, constantes e TierConfig
   state.py         estado do grafo e trace
   graph.py         montagem do grafo e escalonamento
   cli.py           linha de comando
