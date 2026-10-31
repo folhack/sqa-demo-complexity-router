@@ -56,6 +56,8 @@ pip install -r requirements-dev.txt
 pytest --cov=router_demo
 ```
 
+A CI (`.github/workflows/ci.yml`) roda ruff, bandit, pip-audit e pytest com cobertura mínima de 70%.
+
 ## Estrutura
 
 ```

@@ -28,6 +28,20 @@ where = ["src"]
 [tool.setuptools.package-data]
 router_demo = ["presentation/templates/*.html"]
 
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "C90", "PL", "SIM", "ERA", "T20", "S", "BLE", "PERF", "RET", "ARG", "I", "UP"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "PLR2004", "ARG001", "ARG002"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
