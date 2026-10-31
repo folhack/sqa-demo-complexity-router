@@ -27,3 +27,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 router_demo = ["presentation/templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

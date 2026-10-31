@@ -47,6 +47,15 @@ O painel mostra rota inicial e final, caminho no grafo, modelos usados, tentativ
 
 **Custos:** os preços por 1k tokens são estimativas fixas no código (`TierConfig`), não valores cobrados pela OpenAI. Use-os só como ordem de grandeza.
 
+## Testes
+
+Os testes não chamam a OpenAI (usam o backend falso e modelos injetados).
+
+```bash
+pip install -r requirements-dev.txt
+pytest --cov=router_demo
+```
+
 ## Estrutura
 
 ```
