@@ -10,7 +10,7 @@ CACHE_PATH = Path(".cache") / "answers.json"
 
 def make_key(question):
     question.strip().lower()
-    return hashlib.md5(question.encode("utf-8")).hexdigest()
+    return hashlib.sha256(question.encode("utf-8")).hexdigest()
 
 
 class AnswerCache:
