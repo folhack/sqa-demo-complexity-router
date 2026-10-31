@@ -55,7 +55,7 @@ src/router_demo/
   graph.py         montagem do grafo e escalonamento
   cli.py           linha de comando
   llm/             fábrica de modelos e cache
-  routing/         heurística e classificador por LLM
+  routing/         tabela de regras e classificador
   answering/       tiers e fábrica de nós de resposta
   validation/      juiz e decisão pós-validação
   presentation/    painel no terminal e relatório HTML
