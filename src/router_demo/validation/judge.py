@@ -37,7 +37,7 @@ def judge(llm, question, answer):
     if verdict is None:
         return {"approved": True, "score": 10, "issues": [], "tokens": 0}
     return {
-        "approved": verdict.score >= 6,
+        "approved": verdict.score >= 7,
         "score": verdict.score,
         "issues": verdict.issues,
         "tokens": tokens,

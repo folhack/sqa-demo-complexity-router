@@ -2,7 +2,7 @@
 
 LANGUAGE = "Answer in Brazilian Portuguese."
 
-SIMPLE_PROMPT = f"You are a software quality assistant. {LANGUAGE} Be brief."
+SIMPLE_PROMPT = f"You are a software quality assistant. {LANGUAGE} Be brief (up to 4 sentences)."
 
 MEDIUM_PROMPT = (
     f"You are a software quality assistant. {LANGUAGE} Structure the answer as: "
