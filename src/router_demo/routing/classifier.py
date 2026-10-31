@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from langchain_core.output_parsers import PydanticOutputParser
@@ -51,17 +52,20 @@ def uses_shortcut(question: str, hint: str) -> bool:
     return hint == "simple" and len(question.split()) < SHORTCUT_MAX_WORDS
 
 
-def classify(state: RouterState, llm: Any) -> RouterState:
-    question = state["question"]
-    hint = estimate_complexity_hint(question)
-    if uses_shortcut(question, hint):
-        tier, tokens, model = "simple", 0, "heuristic"
-    else:
-        tier, tokens = classify_with_llm(llm, question, hint)
-        model = model_label(llm)
-    return {
-        "initial_tier": tier,
-        "tier": tier,
-        "attempts": 0,
-        **record({}, "classify", model, tokens, CLASSIFIER.price_per_1k),
-    }
+def make_classify_node(llm: Any) -> Callable[[RouterState], RouterState]:
+    def classify(state: RouterState) -> RouterState:
+        question = state["question"]
+        hint = estimate_complexity_hint(question)
+        if uses_shortcut(question, hint):
+            tier, tokens, model = "simple", 0, "heuristic"
+        else:
+            tier, tokens = classify_with_llm(llm, question, hint)
+            model = model_label(llm)
+        return {
+            "initial_tier": tier,
+            "tier": tier,
+            "attempts": 0,
+            **record({}, "classify", model, tokens, CLASSIFIER.price_per_1k),
+        }
+
+    return classify

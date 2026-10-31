@@ -60,8 +60,7 @@ def clear_cache(settings: Settings, password: str, cache: AnswerCache, console: 
     return 0
 
 
-def run(args: argparse.Namespace, console: Console) -> int:
-    settings = load_settings()
+def run(args: argparse.Namespace, settings: Settings, console: Console) -> int:
     cache = AnswerCache()
     if args.clear_cache:
         return clear_cache(settings, args.password, cache, console)
@@ -87,7 +86,7 @@ def run(args: argparse.Namespace, console: Console) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv(find_dotenv(usecwd=True))
-    return run(parse_args(argv), Console())
+    return run(parse_args(argv), load_settings(), Console())
 
 
 if __name__ == "__main__":
