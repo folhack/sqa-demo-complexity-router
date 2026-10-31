@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11,<3.14"
 authors = [{ name = "Mauro" }]
 dependencies = [
-    "jinja2",
+    "jinja2>=3.1.6",
     "langchain-core",
     "langchain-openai",
     "langgraph",
