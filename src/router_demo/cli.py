@@ -1,6 +1,7 @@
 """Command line entry point: python -m router_demo.cli."""
 
 import argparse
+import hmac
 import json
 import sys
 from pathlib import Path
@@ -8,7 +9,7 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 from rich.console import Console
 
-from router_demo.config import CACHE_ADMIN_PASSWORD, load_settings
+from router_demo.config import Settings, load_settings
 from router_demo.graph import build_graph, build_models
 from router_demo.llm.cache import AnswerCache
 from router_demo.presentation.console import render, render_batch
@@ -40,15 +41,24 @@ def answer_question(app, cache, question, use_cache):
     return summary
 
 
-def run(args, console):
-    cache = AnswerCache()
-    if args.clear_cache:
-        if args.password == CACHE_ADMIN_PASSWORD:
-            cache.clear()
-            console.print("Cache limpo.")
-            return 0
+def clear_cache(settings: Settings, password: str, cache: AnswerCache, console: Console) -> int:
+    expected = settings.cache_admin_password
+    if not expected:
+        console.print("CACHE_ADMIN_PASSWORD não definida; limpeza recusada.")
+        return 2
+    if not hmac.compare_digest(password.encode("utf-8"), expected.encode("utf-8")):
         console.print("Senha inválida; limpeza recusada.")
         return 2
+    cache.clear()
+    console.print("Cache limpo.")
+    return 0
+
+
+def run(args, console):
+    settings = load_settings()
+    cache = AnswerCache()
+    if args.clear_cache:
+        return clear_cache(settings, args.password, cache, console)
     if args.batch:
         items = json.loads(args.batch.read_text(encoding="utf-8"))
     else:
@@ -56,7 +66,7 @@ def run(args, console):
     # for item in items:
     #     print(item["question"], item.get("expected_tier"))
     # TODO: support streaming responses
-    app = build_graph(build_models(load_settings()))
+    app = build_graph(build_models(settings))
     rows = []
     failures = 0
     for item in items:

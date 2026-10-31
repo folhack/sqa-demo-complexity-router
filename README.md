@@ -16,7 +16,7 @@ python -m venv .venv
 .venv/Scripts/activate          # Windows (no Linux/macOS: source .venv/bin/activate)
 pip install -r requirements.txt
 pip install -e .
-cp .env.example .env            # preencha a chave e os modelos
+cp .env.example .env            # preencha a chave, os modelos e a senha do cache
 ```
 
 ## Variáveis de ambiente
@@ -28,6 +28,7 @@ cp .env.example .env            # preencha a chave e os modelos
 | `MODEL_MEDIUM` | rota intermediária |
 | `MODEL_STRONG` | plano e rota complexa |
 | `MODEL_JUDGE` | juiz (modelo diferente do que gerou a resposta) |
+| `CACHE_ADMIN_PASSWORD` | senha exigida por `--clear-cache`; vazia, a limpeza é recusada |
 
 Confira os nomes de modelo na documentação vigente da OpenAI antes de usar.
 
