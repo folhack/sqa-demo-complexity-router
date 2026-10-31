@@ -1,11 +1,11 @@
-"""Graph state and trace helper."""
+"""Graph state and trace helpers."""
 
 from __future__ import annotations
 
 from typing import Literal, TypedDict
 
 Tier = Literal["simple", "medium", "complex"]
-TIERS = ("simple", "medium", "complex")
+TIERS: tuple[Tier, ...] = ("simple", "medium", "complex")
 
 
 class RouterState(TypedDict, total=False):
@@ -17,8 +17,7 @@ class RouterState(TypedDict, total=False):
     feedback: str
     verdict: dict
     attempts: int
-    trace: list
-    error: str
+    trace: list[dict]
 
 
 def append_trace(entry: dict, trace: list[dict] | None = None) -> list[dict]:

@@ -56,7 +56,7 @@ src/router_demo/
   cli.py           linha de comando
   llm/             fábrica de modelos e cache
   routing/         heurística e classificador por LLM
-  answering/       nós de resposta e plano
+  answering/       tiers e fábrica de nós de resposta
   validation/      juiz e decisão pós-validação
   presentation/    painel no terminal e relatório HTML
 ```

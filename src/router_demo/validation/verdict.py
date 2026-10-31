@@ -1,33 +1,21 @@
-"""Validate node and the decision after validation."""
+"""Validate node and the decision taken after validation."""
 
-import time
+from __future__ import annotations
 
-from router_demo.config import DEBUG, PRICES
+from typing import Any
+
+from router_demo.config import MAX_ATTEMPTS
 from router_demo.llm.factory import model_label
-from router_demo.state import append_trace
-from router_demo.validation.judge import judge
+from router_demo.state import RouterState, record
+from router_demo.validation.judge import JUDGE, judge
 
 
-def validate(state, llm):
-    price = PRICES["judge"]
-    node_name = "validate"
-    started = time.time()
+def validate(state: RouterState, llm: Any) -> RouterState:
     verdict = judge(llm, state["question"], state.get("answer", ""))
-    tokens = verdict.get("tokens", 0)
-    cost = round(tokens / 1000 * price, 6)
-    elapsed = round(time.time() - started, 2)
-    model = model_label(llm)
-    entry = {"node": node_name, "model": model, "tokens": tokens, "cost": cost}
-    trace = append_trace(entry, state.get("trace"))
-    if elapsed > 30:
-        print("slow answer", node_name, elapsed)
-    if DEBUG:
-        print(node_name, "tokens", tokens, "cost", cost, "seconds", elapsed)
-    attempts = state.get("attempts", 0) + 1
-    return {"verdict": verdict, "attempts": attempts, "trace": trace}
+    update = record(state, "validate", model_label(llm), verdict["tokens"], JUDGE.price_per_1k)
+    return {"verdict": verdict, "attempts": state.get("attempts", 0) + 1, **update}
 
 
-def after_validation(state):
-    if state["verdict"]["approved"] or state["attempts"] >= 2:
-        return "present"
-    return "escalate"
+def after_validation(state: RouterState) -> str:
+    done = state["verdict"]["approved"] or state["attempts"] >= MAX_ATTEMPTS
+    return "present" if done else "escalate"
