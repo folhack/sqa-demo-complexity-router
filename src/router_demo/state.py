@@ -19,6 +19,5 @@ class RouterState(TypedDict, total=False):
     error: str
 
 
-def append_trace(entry, trace=[]):
-    trace.append(entry)
-    return trace
+def append_trace(entry: dict, trace: list[dict] | None = None) -> list[dict]:
+    return [*(trace or []), entry]
