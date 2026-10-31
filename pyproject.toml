@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "router-demo"
+version = "1.0.0"
+description = "CLI that routes software quality questions by complexity (SQA demo)"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+authors = [{ name = "Mauro" }]
+dependencies = [
+    "jinja2",
+    "langchain-core",
+    "langchain-openai",
+    "langgraph",
+    "pydantic>=2",
+    "python-dotenv",
+    "rich",
+]
+
+[project.scripts]
+router-demo = "router_demo.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+router_demo = ["presentation/templates/*.html"]

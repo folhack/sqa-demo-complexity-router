@@ -1,0 +1,8 @@
+[
+  {"question": "O que é complexidade ciclomática?", "expected_tier": "simple"},
+  {"question": "Para que serve o bus factor?", "expected_tier": "simple"},
+  {"question": "Compare duplicação de código e complexidade cognitiva: qual deve ser atacada primeiro e por quê?", "expected_tier": "medium"},
+  {"question": "Quando vale a pena usar cobertura de testes como gate de CI e quando ela engana?", "expected_tier": "medium"},
+  {"question": "Monte um plano de 90 dias para reduzir dívida técnica e bus factor em um monólito legado com 25% de duplicação, sem congelar a entrega de features.", "expected_tier": "complex"},
+  {"question": "Defina uma estratégia de adoção de IA generativa no desenvolvimento que evite o aumento de duplicação e preserve a distribuição de conhecimento no time.", "expected_tier": "complex"}
+]
