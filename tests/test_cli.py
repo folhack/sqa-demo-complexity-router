@@ -49,6 +49,13 @@ def test_cli_question_uses_cache(capsys) -> None:
     assert "sim" in capsys.readouterr().out
 
 
+def test_cli_question_prints_json(capsys) -> None:
+    assert cli.main(["--question", "O que e bus factor?", "--no-cache", "--json"]) == 0
+    summary = json.loads(capsys.readouterr().out)
+    assert summary["question"] == "O que e bus factor?"
+    assert summary["final_tier"] == "simple"
+
+
 def test_cli_reports_llm_failure(monkeypatch: pytest.MonkeyPatch, capsys) -> None:
     class Broken:
         def invoke(self, _state):

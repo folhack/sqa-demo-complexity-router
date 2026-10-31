@@ -16,7 +16,7 @@ from router_demo.config import Settings, load_settings
 from router_demo.graph import build_graph, build_models
 from router_demo.llm.cache import AnswerCache
 from router_demo.llm.factory import LLM_ERRORS
-from router_demo.presentation.console import render, render_batch
+from router_demo.presentation.console import render_batch, renderer
 from router_demo.presentation.report import write_report
 from router_demo.presentation.summary import summarize
 
@@ -30,6 +30,7 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--report", type=Path, help="write an HTML report to this path")
     parser.add_argument("--no-cache", action="store_true", help="ignore and do not update cache")
     parser.add_argument("--password", default="", help="admin password for --clear-cache")
+    parser.add_argument("--json", action="store_true", help="print each result as JSON")
     return parser.parse_args(argv)
 
 
@@ -66,6 +67,7 @@ def run(args: argparse.Namespace, settings: Settings, console: Console) -> int:
         return clear_cache(settings, args.password, cache, console)
     items = load_batch(args.batch) if args.batch else [{"question": args.question}]
     app = build_graph(build_models(settings))
+    show = renderer(args.json)
     rows, failures = [], 0
     for item in items:
         try:
@@ -74,7 +76,7 @@ def run(args: argparse.Namespace, settings: Settings, console: Console) -> int:
             console.print(f"Falha ao responder ({type(exc).__name__}): {item['question']}")
             failures += 1
             continue
-        render(summary, console)
+        show(summary, console)
         rows.append((item.get("expected_tier", "-"), summary))
     if args.batch:
         render_batch(rows, console)
