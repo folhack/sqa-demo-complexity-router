@@ -10,12 +10,15 @@ from langchain_core.runnables import Runnable
 from langchain_openai import ChatOpenAI
 from openai import BadRequestError, OpenAIError
 
-from router_demo.config import Settings, TierConfig
+from router_demo.config import FAKE_BACKEND, Settings, TierConfig
+from router_demo.llm.fake import FakeChatModel
 
 LLM_ERRORS = (OpenAIError, ValueError, TypeError, RuntimeError, OSError)
 
 
 def make_llm(settings: Settings, config: TierConfig, temperature: float | None = None) -> Runnable:
+    if settings.backend == FAKE_BACKEND:
+        return FakeChatModel(role=config.name, model_name=f"fake-{config.name}")
     model = settings.models.get(config.model_env, "")
     if not model:
         raise ValueError(f"{config.model_env} is not set")

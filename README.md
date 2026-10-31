@@ -7,7 +7,7 @@ CLI que responde perguntas sobre qualidade de software e escolhe o caminho confo
 ## Requisitos
 
 * Python 3.11 a 3.13
-* Uma chave da OpenAI
+* Uma chave da OpenAI (ou o backend falso, que roda sem rede)
 
 ## Instalação
 
@@ -29,6 +29,7 @@ cp .env.example .env            # preencha a chave, os modelos e a senha do cach
 | `MODEL_STRONG` | plano e rota complexa |
 | `MODEL_JUDGE` | juiz (modelo diferente do que gerou a resposta) |
 | `CACHE_ADMIN_PASSWORD` | senha exigida por `--clear-cache`; vazia, a limpeza é recusada |
+| `LLM_BACKEND` | `openai` (padrão) ou `fake` (offline, determinístico) |
 
 Confira os nomes de modelo na documentação vigente da OpenAI antes de usar.
 
@@ -54,7 +55,7 @@ src/router_demo/
   state.py         estado do grafo e trace
   graph.py         montagem do grafo e escalonamento
   cli.py           linha de comando
-  llm/             fábrica de modelos e cache
+  llm/             fábrica de modelos, backend falso, cache
   routing/         tabela de regras e classificador
   answering/       tiers e fábrica de nós de resposta
   validation/      juiz e decisão pós-validação
