@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from collections.abc import Callable
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -43,6 +46,14 @@ def summary_table(summary: dict) -> Table:
 def render(summary: dict, console: Console) -> None:
     console.print(Panel(summary_table(summary), title="Roteamento", expand=False))
     console.print(Panel(Text(summary["answer"]), title="Resposta"))
+
+
+def render_json(summary: dict, console: Console) -> None:
+    console.out(json.dumps(summary, ensure_ascii=False, indent=2), highlight=False)
+
+
+def renderer(as_json: bool) -> Callable[[dict, Console], None]:
+    return render_json if as_json else render
 
 
 def render_batch(rows: list[tuple[str, dict]], console: Console) -> None:
